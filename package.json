@@ -1,0 +1,20 @@
+{
+  "name": "socket-io-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal Socket.IO gateway for room-based chat fan-out",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "socket.io": "^4.8.1"
+  }
+}
