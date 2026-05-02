@@ -9,7 +9,7 @@ function createChatServiceClient() {
 
   return {
     async publishTalk(payload) {
-      await http.post('/chat/message', payload);
+      await http.post('/message', payload);
     },
   };
 }

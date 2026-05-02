@@ -18,11 +18,16 @@ function parseRedisNodes(value) {
 
 module.exports = {
   port: toNumber(process.env.PORT, 3000),
+  socketPath: process.env.SOCKET_PATH || '/socket.io',
   redis: {
     nodes: parseRedisNodes(process.env.REDIS_NODES),
   },
+  roomService: {
+    baseUrl: process.env.ROOM_SERVICE_URL || 'http://127.0.0.1:8082',
+    timeoutMs: toNumber(process.env.ROOM_SERVICE_TIMEOUT_MS, 3000),
+  },
   chatService: {
-    baseUrl: process.env.CHAT_SERVICE_URL || 'http://127.0.0.1:8083',
+    baseUrl: process.env.CHAT_SERVICE_URL || 'http://127.0.0.1:8083/api/chat',
     timeoutMs: toNumber(process.env.CHAT_SERVICE_TIMEOUT_MS, 3000),
   },
   clientOrigin: process.env.CLIENT_ORIGIN || '*',

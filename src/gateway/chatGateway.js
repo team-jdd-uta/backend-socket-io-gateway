@@ -1,4 +1,5 @@
 const { incrementSessionCount, decrementSessionCount } = require('../redis/sessionCounter');
+const { createRoomServiceClient } = require('../client/roomServiceClient');
 const { createChatServiceClient } = require('../client/chatServiceClient');
 const { ChannelManager } = require('../pubsub/channelManager');
 
@@ -11,6 +12,7 @@ function safeParse(message) {
 }
 
 function createChatGateway({ io, redisClients }) {
+  const roomServiceClient = createRoomServiceClient();
   const chatServiceClient = createChatServiceClient();
   const channelManager = new ChannelManager(redisClients.subscriberClient, (roomId, message) => {
     const payload = safeParse(message);
@@ -25,15 +27,37 @@ function createChatGateway({ io, redisClients }) {
   io.on('connection', (socket) => {
     console.log(`[gateway] connected socket=${socket.id}`);
     socket.data.joinedRooms = new Set();
+    socket.data.userId = '';
+    socket.data.sender = '';
+    socket.data.roomOwnerUserId = '';
+    socket.data.roomName = '';
 
     socket.on('ENTER', async (payload = {}) => {
       try {
         const roomId = payload.roomId;
+        const joinToken = typeof payload.joinToken === 'string' ? payload.joinToken.trim() : '';
+        const joinUserId = typeof payload.userId === 'string' ? payload.userId.trim() : '';
+        const sender = typeof payload.sender === 'string' ? payload.sender.trim() : '';
+
         if (!roomId || socket.data.joinedRooms.has(roomId)) {
           return;
         }
 
+        if (!joinUserId || !joinToken) {
+          throw new Error('join token or userId is missing');
+        }
+
+        const joinedRoom = await roomServiceClient.joinRoom(roomId, {
+          userId: joinUserId,
+          sender: sender || joinUserId,
+          joinToken,
+        });
+
         console.log(`[gateway] ENTER socket=${socket.id} room=${roomId}`);
+        socket.data.userId = joinUserId;
+        socket.data.sender = sender || joinUserId;
+        socket.data.roomOwnerUserId = joinedRoom?.broadcasterId || '';
+        socket.data.roomName = joinedRoom?.name || '';
         socket.join(roomId);
         socket.data.joinedRooms.add(roomId);
 
@@ -66,7 +90,10 @@ function createChatGateway({ io, redisClients }) {
         await chatServiceClient.publishTalk({
           type: 'TALK',
           roomId,
-          sender: payload.sender || socket.id,
+          sender: socket.data.sender || payload.sender || socket.id,
+          senderUserId: socket.data.userId || payload.userId || '',
+          roomOwnerUserId: socket.data.roomOwnerUserId || payload.roomOwnerUserId || '',
+          roomName: socket.data.roomName || payload.roomName || '',
           message: payload.message || '',
           msgId: payload.msgId || undefined,
         });

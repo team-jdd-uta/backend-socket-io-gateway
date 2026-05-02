@@ -22,6 +22,7 @@ async function main() {
   });
 
   const io = new Server(server, {
+    path: config.socketPath,
     cors: {
       origin: config.clientOrigin === '*' ? true : config.clientOrigin,
       credentials: false,
