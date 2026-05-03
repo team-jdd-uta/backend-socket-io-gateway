@@ -13,16 +13,18 @@ function createRoomServiceClient() {
       return response.data;
     },
 
-    async issueJoinToken(roomId, userId) {
+    async issueJoinToken(roomId, userId, headers = {}) {
       const response = await http.post(`/rooms/${encodeURIComponent(roomId)}/join-token`, null, {
         params: { userId },
+        headers,
       });
       return response.data;
     },
 
-    async joinRoom(roomId, payload) {
+    async joinRoom(roomId, payload, headers = {}) {
       const response = await http.post(`/rooms/${encodeURIComponent(roomId)}/join`, null, {
         params: payload,
+        headers,
       });
       return response.data;
     },

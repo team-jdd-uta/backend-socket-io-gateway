@@ -8,8 +8,10 @@ function createChatServiceClient() {
   });
 
   return {
-    async publishTalk(payload) {
-      await http.post('/message', payload);
+    async publishTalk(payload, headers = {}) {
+      await http.post('/message', payload, {
+        headers,
+      });
     },
   };
 }
