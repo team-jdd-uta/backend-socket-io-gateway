@@ -45,7 +45,7 @@ Socket.IO 연결을 받는 채팅 게이트웨이입니다. 브라우저와 WebS
 | `PORT` | `3000` | HTTP 및 Socket.IO 서버 포트 |
 | `REDIS_NODES` | `127.0.0.1:7000` | Redis Cluster 노드 목록. comma-separated |
 | `SOCKET_PATH` | `/socket.io` | Socket.IO path |
-| `CHAT_SERVICE_URL` | `http://127.0.0.1:8083/api/chat` | chat-service base URL |
+| `CHAT_SERVICE_URL` | `http://127.0.0.1:8083` | chat-service base URL |
 | `CHAT_SERVICE_TIMEOUT_MS` | `3000` | chat-service 호출 timeout |
 | `CLIENT_ORIGIN` | `*` | Socket.IO CORS 허용 origin |
 | `DRAIN_TIMEOUT_MS` | `5000` | 종료 시 connection drain 대기 시간 |
@@ -55,9 +55,11 @@ Socket.IO 연결을 받는 채팅 게이트웨이입니다. 브라우저와 WebS
 ```bash
 PORT=3000 \
 REDIS_NODES=127.0.0.1:7000,127.0.0.1:7001 \
-CHAT_SERVICE_URL=http://localhost:8083/api/chat \
+CHAT_SERVICE_URL=http://localhost:8083 \
 npm start
 ```
+
+로컬 `backend-chat-service`는 기본 context path 없이 `/message`를 제공하므로 `CHAT_SERVICE_URL=http://localhost:8083`을 사용한다. Kubernetes에서는 GitOps가 `SERVER_CONTEXT_PATH=/api/chat`와 `CHAT_SERVICE_URL=http://backend-chat-service:8083/api/chat`를 함께 주입한다.
 
 ## 로컬 실행
 

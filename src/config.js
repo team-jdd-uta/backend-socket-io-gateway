@@ -27,7 +27,7 @@ module.exports = {
     timeoutMs: toNumber(process.env.ROOM_SERVICE_TIMEOUT_MS, 3000),
   },
   chatService: {
-    baseUrl: process.env.CHAT_SERVICE_URL || 'http://127.0.0.1:8083/api/chat',
+    baseUrl: process.env.CHAT_SERVICE_URL || 'http://127.0.0.1:8083',
     timeoutMs: toNumber(process.env.CHAT_SERVICE_TIMEOUT_MS, 3000),
   },
   clientOrigin: process.env.CLIENT_ORIGIN || '*',
