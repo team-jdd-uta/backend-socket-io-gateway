@@ -149,6 +149,9 @@ function createChatGateway({ io, redisClients }) {
           roomName: socket.data.roomName || payload.roomName || '',
           message: payload.message || '',
           msgId: payload.msgId || undefined,
+        }, {
+          'X-Auth-Gateway': 'socket-io-gateway',
+          'X-User-Id': socket.data.userId,
         });
       } catch (error) {
         socket.emit('error', {
