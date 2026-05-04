@@ -14,6 +14,17 @@ function safeParse(message) {
   }
 }
 
+function normalizeBoolean(value) {
+  return value === true || value === 'true';
+}
+
+function normalizeChatPayload(payload) {
+  return {
+    ...payload,
+    isSuperChat: normalizeBoolean(payload.isSuperChat) || normalizeBoolean(payload.superChat),
+  };
+}
+
 function createChatGateway({ io, redisClients }) {
   const roomServiceClient = createRoomServiceClient();
   const chatServiceClient = createChatServiceClient();
@@ -25,8 +36,9 @@ function createChatGateway({ io, redisClients }) {
       return;
     }
 
-    console.log(`[gateway] pubsub fan-out room=${roomId} type=${payload.type || 'unknown'}`);
-    io.to(roomId).emit('TALK', payload);
+    const normalizedPayload = normalizeChatPayload(payload);
+    console.log(`[gateway] pubsub fan-out room=${roomId} type=${normalizedPayload.type || 'unknown'} super=${normalizedPayload.isSuperChat}`);
+    io.to(roomId).emit('TALK', normalizedPayload);
   });
 
   io.on('connection', (socket) => {
@@ -139,7 +151,7 @@ function createChatGateway({ io, redisClients }) {
           throw new Error('authentication is required to send chat messages');
         }
 
-        const isSuperChat = payload.isSuperChat === true || payload.isSuperChat === 'true';
+        const isSuperChat = normalizeBoolean(payload.isSuperChat) || normalizeBoolean(payload.superChat);
         console.log(`[gateway] TALK socket=${socket.id} room=${roomId} sender=${payload.sender || socket.id} super=${isSuperChat}`);
         await chatServiceClient.publishTalk({
           type: 'TALK',
