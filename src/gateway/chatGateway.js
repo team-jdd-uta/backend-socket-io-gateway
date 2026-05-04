@@ -25,7 +25,7 @@ function normalizeChatPayload(payload) {
   };
 }
 
-function createChatGateway({ io, redisClients }) {
+function createChatGateway({ io, redisClients, metrics }) {
   const roomServiceClient = createRoomServiceClient();
   const chatServiceClient = createChatServiceClient();
   const tokenVerifier = createCognitoJwtVerifier();
@@ -43,6 +43,7 @@ function createChatGateway({ io, redisClients }) {
 
   io.on('connection', (socket) => {
     console.log(`[gateway] connected socket=${socket.id}`);
+    metrics?.onConnection?.();
     socket.data.joinedRooms = new Set();
     socket.data.userId = String(socket.handshake.headers['x-user-id'] || '').trim();
     socket.data.sender = '';
@@ -207,6 +208,7 @@ function createChatGateway({ io, redisClients }) {
       for (const roomId of rooms) {
         await leaveRoom(roomId, false);
       }
+      metrics?.onDisconnect?.();
     });
   });
 
