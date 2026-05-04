@@ -139,7 +139,8 @@ function createChatGateway({ io, redisClients }) {
           throw new Error('authentication is required to send chat messages');
         }
 
-        console.log(`[gateway] TALK socket=${socket.id} room=${roomId} sender=${payload.sender || socket.id}`);
+        const isSuperChat = payload.isSuperChat === true || payload.isSuperChat === 'true';
+        console.log(`[gateway] TALK socket=${socket.id} room=${roomId} sender=${payload.sender || socket.id} super=${isSuperChat}`);
         await chatServiceClient.publishTalk({
           type: 'TALK',
           roomId,
@@ -148,6 +149,7 @@ function createChatGateway({ io, redisClients }) {
           roomOwnerUserId: socket.data.roomOwnerUserId || payload.roomOwnerUserId || '',
           roomName: socket.data.roomName || payload.roomName || '',
           message: payload.message || '',
+          isSuperChat,
           msgId: payload.msgId || undefined,
         }, {
           'X-Auth-Gateway': 'socket-io-gateway',
